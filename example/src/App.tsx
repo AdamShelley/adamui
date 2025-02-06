@@ -1,7 +1,9 @@
+import SearchBar from "../../src/components/search-bar/search-bar";
 import { Timeline } from "../../src/components/timeline";
+import { TimelineItem } from "../../src/components/timeline/timeline";
 
 type TimelineDataProps = Array<{
-  id: string;
+  id: number;
   title: string;
   date: string;
   content: string;
@@ -14,7 +16,7 @@ type TimelineDataProps = Array<{
 
 const exampleTimelineData: TimelineDataProps = [
   {
-    id: "1",
+    id: 1,
     title: "First item",
     date: "2021-01-01",
     content: "This is the first item",
@@ -32,7 +34,7 @@ const exampleTimelineData: TimelineDataProps = [
     ],
   },
   {
-    id: "2",
+    id: 2,
     title: "Second item",
     date: "2021-01-04",
     content: "This is the second item",
@@ -53,9 +55,22 @@ const exampleTimelineData: TimelineDataProps = [
 
 function App() {
   return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-8">ADAMUI Example</h1>
-      <Timeline items={exampleTimelineData} />
+    <div className="min-h-screen p-8 flex flex-col w-screen gap-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">ADAMUI</h1>
+
+      <h2 className="text-2xl font-bold mb-4">Timeline</h2>
+      <section className="w-full flex justify-center ">
+        <Timeline orientation="vertical" className="mt-10 ">
+          {exampleTimelineData.map((item) => (
+            <TimelineItem key={item.id} item={item} />
+          ))}
+        </Timeline>
+      </section>
+
+      <h2 className="text-2xl font-bold mb-4">Morphing Search Bar</h2>
+      <section className="w-full flex justify-center ">
+        <SearchBar />
+      </section>
     </div>
   );
 }
