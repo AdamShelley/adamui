@@ -1,6 +1,4 @@
 import SearchBar from "../../src/components/search-bar/search-bar";
-import { Timeline } from "../../src/components/timeline";
-import { TimelineItem } from "../../src/components/timeline/timeline";
 
 type TimelineDataProps = Array<{
   id: number;
@@ -58,19 +56,26 @@ function App() {
     <div className="min-h-screen p-8 flex flex-col w-screen gap-4">
       <h1 className="text-3xl font-bold mb-8 text-center">ADAMUI</h1>
 
-      <h2 className="text-2xl font-bold mb-4">Timeline</h2>
-      <section className="w-full flex justify-center ">
+      <h2 className="text-2xl font-bold mb-4">Search Bar</h2>
+      <section className="w-full flex justify-center gap-2">
+        <div className="flex flex-col align-center gap-4">
+          <span>Standard</span>
+          <SearchBar />
+          <span>Always Open</span>
+          <SearchBar alwaysOpen />
+          <span>Autocomplete Dropdown</span>
+          <SearchBar autoComplete />
+        </div>
+      </section>
+
+      {/* <h2 className="text-2xl font-bold mb-4">Timeline</h2> */}
+      {/* <section className="w-full flex justify-center ">
         <Timeline orientation="vertical" className="mt-10 ">
           {exampleTimelineData.map((item) => (
             <TimelineItem key={item.id} item={item} />
           ))}
         </Timeline>
-      </section>
-
-      <h2 className="text-2xl font-bold mb-4">Morphing Search Bar</h2>
-      <section className="w-full flex justify-center ">
-        <SearchBar />
-      </section>
+      </section> */}
     </div>
   );
 }

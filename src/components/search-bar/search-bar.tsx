@@ -6,9 +6,14 @@ import { AnimatePresence, motion } from "framer-motion";
 type SearchBarProps = {
   className?: string;
   alwaysOpen?: boolean;
+  autoComplete?: boolean;
 };
 
-const SearchBar = ({ className, alwaysOpen }: SearchBarProps) => {
+const SearchBar = ({
+  className,
+  alwaysOpen = false,
+  autoComplete = false,
+}: SearchBarProps) => {
   const [isOpen, setIsOpen] = React.useState(alwaysOpen ?? false);
 
   const handleClick = () => {
@@ -22,7 +27,7 @@ const SearchBar = ({ className, alwaysOpen }: SearchBarProps) => {
       animate={{ scale: isOpen ? 1.1 : 1 }}
       transition={{
         layout: { duration: 0.2 },
-        scale: { type: "spring", stiffness: 500, damping: 20 },
+        scale: { type: "spring", stiffness: 200, damping: 20 },
       }}
       className={cn(
         "w-fit border-4 border-teal-600 rounded-full  inline-flex items-center bg-white overflow-hidden",
@@ -40,17 +45,35 @@ const SearchBar = ({ className, alwaysOpen }: SearchBarProps) => {
 
       <AnimatePresence mode="wait">
         {isOpen && (
-          <motion.input
-            type="text"
-            className="bg-white text-black p-3 text-sm min-w-0 pl-10"
-            initial={{ width: 0, scale: 0 }}
-            animate={{ width: "200px", scale: 1 }}
-            exit={{ width: 0, scale: 0, opacity: 0 }}
-            transition={{
-              duration: 0.2,
-              ease: "easeInOut",
-            }}
-          />
+          <>
+            <motion.input
+              type="text"
+              className="bg-white text-black p-3 text-sm min-w-0 pl-10"
+              // animate={{ width: "200px", scale: 1 }}
+              exit={{ width: "10px", scale: 0, opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeInOut",
+              }}
+            />
+            {autoComplete && (
+              <motion.div
+                className="bg-white text-black p-3 text-sm min-w-0 pl-10"
+                // animate={{ width: "200px", scale: 1 }}
+                exit={{ width: "10px", scale: 0, opacity: 0 }}
+                transition={{
+                  duration: 0.2,
+                  ease: "easeInOut",
+                }}
+              >
+                <ul className="p-0 m-0">
+                  <li className="p-2 hover:bg-gray-100">Item 1</li>
+                  <li className="p-2 hover:bg-gray-100">Item 2</li>
+                  <li className="p-2 hover:bg-gray-100">Item 3</li>
+                </ul>
+              </motion.div>
+            )}
+          </>
         )}
       </AnimatePresence>
     </motion.div>
