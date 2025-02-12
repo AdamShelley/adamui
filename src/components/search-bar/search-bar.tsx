@@ -110,7 +110,8 @@ const SearchBar = ({
             willChange: "transform"
           }}
           transition={{
-            scale: { type: "spring", stiffness: 700, damping: 50 }
+            scale: { type: "spring", stiffness: 700, damping: 50 },
+            layout: { duration: 0.2 }
           }}
         >
           <div className={cn(
@@ -202,33 +203,48 @@ const SearchBar = ({
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ 
-                    height: "auto", 
-                    opacity: 1
+                    height: filteredSuggestions.length * 44, 
+                    opacity: 1,
+                    transition: {
+                      height: { duration: 0.15, ease: "linear" },
+                      opacity: { duration: 0.1 }
+                    }
                   }}
                   exit={{ 
                     height: 0, 
-                    opacity: 0
+                    opacity: 0,
+                    transition: {
+                      height: { duration: 0.15, ease: "linear" },
+                      opacity: { duration: 0.05 }
+                    }
                   }}
-                  transition={{ 
-                    height: { type: "spring", stiffness: 700, damping: 50 }
+                  style={{ 
+                    overflow: "hidden"
                   }}
-                  className="w-full overflow-hidden"
+                  className="w-full"
                 >
-                  <ul className="p-0 m-0 max-h-[200px] overflow-y-auto">
+                  <div 
+                    className="p-0 m-0 scrollbar-none scrollbar-thumb-gray-300/50 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                    style={{
+                      maxHeight: Math.min(filteredSuggestions.length * 44, 200),
+                      overscrollBehavior: "contain",
+                      scrollbarGutter: "stable"
+                    }}
+                  >
                     {filteredSuggestions.map((suggestion, index) => (
-                      <li 
+                      <div 
                         ref={index === selectedIndex ? selectedRef : null}
                         key={suggestion.id} 
                         className={cn(
-                          "p-3 hover:bg-gray-100 text-black cursor-pointer transition-colors text-sm",
+                          "p-3 hover:bg-gray-100 text-black cursor-pointer transition-colors text-sm h-11",
                           { "bg-gray-100": index === selectedIndex }
                         )}
                         onClick={() => handleSelect(suggestion.value)}
                       >
                         {suggestion.value}
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
