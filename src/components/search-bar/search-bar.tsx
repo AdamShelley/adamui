@@ -3,15 +3,15 @@ import { cn } from "../../lib/utils";
 import { Search } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-interface Suggestion {
+export interface Suggestion {
   id: string | number;
   value: string;
 }
 
-type SearchBarVariant = "default" | "minimal" | "bordered";
-type SearchBarSize = "sm" | "md" | "lg";
+export type SearchBarVariant = "default" | "minimal" | "bordered";
+export type SearchBarSize = "sm" | "md" | "lg";
 
-type SearchBarProps = {
+export interface SearchBarProps {
   className?: string;
   // Core functionality
   alwaysOpen?: boolean;
@@ -38,7 +38,7 @@ type SearchBarProps = {
   clearOnSelect?: boolean;
   closeOnSelect?: boolean;
   maxSuggestions?: number;
-};
+}
 
 const SearchBar = ({
   className,
