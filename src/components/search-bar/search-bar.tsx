@@ -3,19 +3,41 @@ import { cn } from "../../lib/utils";
 import { Search } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-// Define the type for the autocomplete suggestions
 interface Suggestion {
   id: string | number;
   value: string;
 }
 
+type SearchBarVariant = "default" | "minimal" | "bordered";
+type SearchBarSize = "sm" | "md" | "lg";
+
 type SearchBarProps = {
   className?: string;
+  // Core functionality
   alwaysOpen?: boolean;
   autoComplete?: boolean;
   suggestions?: Suggestion[];
   onSelect?: (value: string) => void;
   onChange?: (value: string) => void;
+  // Styling options
+  variant?: SearchBarVariant;
+  size?: SearchBarSize;
+  placeholder?: string;
+  borderColor?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  iconColor?: string;
+  suggestionHighlightColor?: string;
+  // Animation options
+  disableAnimations?: boolean;
+  springConfig?: {
+    stiffness?: number;
+    damping?: number;
+  };
+  // Behavior
+  clearOnSelect?: boolean;
+  closeOnSelect?: boolean;
+  maxSuggestions?: number;
 };
 
 const SearchBar = ({
@@ -25,12 +47,29 @@ const SearchBar = ({
   suggestions = [],
   onSelect,
   onChange,
+  // New props with defaults
+  variant = "default",
+  size = "md",
+  placeholder = "Search...",
+  borderColor = "border-teal-600",
+  backgroundColor = "bg-white",
+  textColor = "text-black",
+  iconColor,
+  suggestionHighlightColor = "bg-gray-100",
+  disableAnimations = false,
+  springConfig = {
+    stiffness: 700,
+    damping: 50,
+  },
+  clearOnSelect = false,
+  closeOnSelect = false,
+  maxSuggestions = 6,
 }: SearchBarProps) => {
   const [isOpen, setIsOpen] = React.useState(alwaysOpen ?? false);
   const [query, setQuery] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(-1);
   const [isTyping, setIsTyping] = React.useState(false);
-  const selectedRef = React.useRef<HTMLLIElement>(null);
+  const selectedRef = React.useRef<HTMLDivElement>(null);
   const uniqueId = React.useId(); // Generate a unique ID for each instance
   const typingTimeoutRef = React.useRef<number>();
 
@@ -60,9 +99,16 @@ const SearchBar = ({
   };
 
   const handleSelect = (value: string) => {
-    setQuery(value);
+    if (clearOnSelect) {
+      setQuery("");
+    } else {
+      setQuery(value);
+    }
     setSelectedIndex(-1);
     onSelect?.(value);
+    if (closeOnSelect) {
+      setIsOpen(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -91,55 +137,77 @@ const SearchBar = ({
     }
   };
 
-  const filteredSuggestions = suggestions.filter((suggestion) =>
-    suggestion.value.toLowerCase().includes(query.toLowerCase())
-  );
+  // Size classes
+  const sizeClasses = {
+    sm: "text-sm py-2",
+    md: "text-base py-3",
+    lg: "text-lg py-4"
+  };
+
+  // Variant classes
+  const variantClasses = {
+    default: `border-4 ${borderColor}`,
+    minimal: "border-0 shadow-lg",
+    bordered: `border-2 ${borderColor}`
+  };
+
+  const filteredSuggestions = suggestions
+    .filter((suggestion) =>
+      suggestion.value.toLowerCase().includes(query.toLowerCase())
+    )
+    .slice(0, maxSuggestions);
 
   const showSuggestions = autoComplete && isOpen && query && filteredSuggestions.length > 0;
 
   const scale = isTyping ? 0.99 : (isOpen ? 1.01 : 1);
 
   return (
-    <div className="relative w-full" style={{ minHeight: "48px" }}>
+    <div className="relative w-full" style={{ minHeight: sizeClasses[size] }}>
       <div className="w-fit">
         <motion.div
           layoutId={`searchbar-${uniqueId}`}
-          animate={{ scale }}
+          animate={!disableAnimations ? { scale } : {}}
           style={{
             transformOrigin: "left center",
             willChange: "transform"
           }}
           transition={{
-            scale: { type: "spring", stiffness: 700, damping: 50 },
+            scale: { 
+              type: "spring", 
+              stiffness: springConfig.stiffness, 
+              damping: springConfig.damping 
+            },
             layout: { duration: 0.2 }
           }}
         >
           <div className={cn(
-            "relative border-4 border-teal-600 bg-white",
+            variantClasses[variant],
+            backgroundColor,
             "transition-[border-radius] duration-300 ease-out",
             showSuggestions 
               ? "rounded-t-[24px]" 
-              : "rounded-[24px]"
+              : "rounded-[24px]",
+            className
           )}>
             <div className={cn(
               "flex items-center transition-[padding] duration-300",
               isOpen ? "pr-4" : "pr-0"
             )}>
               <motion.div
-                animate={{ 
+                animate={!disableAnimations ? { 
                   scale: isOpen ? 0.9 : 1,
                   rotate: isOpen ? 360 : 0
-                }}
+                } : {}}
                 transition={{
-                  scale: { type: "spring", stiffness: 600, damping: 45 },
+                  scale: { type: "spring", stiffness: springConfig.stiffness, damping: springConfig.damping },
                   rotate: { type: "spring", stiffness: 200, damping: 20 }
                 }}
                 className="flex items-center"
               >
                 <Search
                   className={cn("h-5 w-5 font-bold m-3 transition-colors duration-300", {
-                    "text-gray-500": isOpen,
-                    "text-teal-600": !isOpen,
+                    [iconColor || "text-gray-500"]: isOpen,
+                    [iconColor || "text-teal-600"]: !isOpen,
                     "cursor-pointer": !alwaysOpen,
                   })}
                   onClick={handleClick}
@@ -149,45 +217,33 @@ const SearchBar = ({
               <AnimatePresence mode="wait">
                 {isOpen && (
                   <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ 
-                      width: 200,
-                      transition: {
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }
-                    }}
-                    exit={{ 
-                      width: 0,
-                      transition: {
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }
+                    initial={!disableAnimations ? { width: 0 } : undefined}
+                    animate={!disableAnimations ? { 
+                      width: size === "sm" ? 150 : size === "lg" ? 250 : 200,
+                    } : undefined}
+                    exit={!disableAnimations ? { width: 0 } : undefined}
+                    transition={{
+                      type: "spring",
+                      stiffness: springConfig.stiffness,
+                      damping: springConfig.damping,
                     }}
                     style={{ overflow: "hidden" }}
                   >
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ 
-                        opacity: 1,
-                        transition: {
-                          duration: 0.15,
-                          delay: 0.1
-                        }
-                      }}
-                      exit={{ 
-                        opacity: 0,
-                        transition: {
-                          duration: 0.1
-                        }
-                      }}
+                      initial={!disableAnimations ? { opacity: 0 } : undefined}
+                      animate={!disableAnimations ? { opacity: 1 } : undefined}
+                      exit={!disableAnimations ? { opacity: 0 } : undefined}
                     >
                       <input
                         type="text"
-                        className="bg-white text-black py-3 text-sm outline-none focus:outline-none focus:ring-0 w-full pl-2"
+                        className={cn(
+                          backgroundColor,
+                          textColor,
+                          sizeClasses[size],
+                          "outline-none focus:outline-none focus:ring-0 w-full pl-2"
+                        )}
                         value={query}
+                        placeholder={placeholder}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         style={{ WebkitAppearance: "none" }}
@@ -201,32 +257,22 @@ const SearchBar = ({
             <AnimatePresence>
               {showSuggestions && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ 
-                    height: filteredSuggestions.length * 44, 
-                    opacity: 1,
-                    transition: {
-                      height: { duration: 0.15, ease: "linear" },
-                      opacity: { duration: 0.1 }
-                    }
-                  }}
-                  exit={{ 
-                    height: 0, 
-                    opacity: 0,
-                    transition: {
-                      height: { duration: 0.15, ease: "linear" },
-                      opacity: { duration: 0.05 }
-                    }
-                  }}
-                  style={{ 
-                    overflow: "hidden"
-                  }}
+                  initial={!disableAnimations ? { height: 0, opacity: 0 } : undefined}
+                  animate={!disableAnimations ? { 
+                    height: filteredSuggestions.length * (size === "sm" ? 36 : size === "lg" ? 52 : 44), 
+                    opacity: 1
+                  } : undefined}
+                  exit={!disableAnimations ? { height: 0, opacity: 0 } : undefined}
                   className="w-full"
+                  style={{ overflow: "hidden" }}
                 >
                   <div 
-                    className="p-0 m-0 scrollbar-none scrollbar-thumb-gray-300/50 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                    className={cn(
+                      "p-0 m-0 scrollbar-none",
+                      backgroundColor
+                    )}
                     style={{
-                      maxHeight: Math.min(filteredSuggestions.length * 44, 200),
+                      maxHeight: Math.min(filteredSuggestions.length * (size === "sm" ? 36 : size === "lg" ? 52 : 44), 250),
                       overscrollBehavior: "contain",
                       scrollbarGutter: "stable"
                     }}
@@ -236,8 +282,10 @@ const SearchBar = ({
                         ref={index === selectedIndex ? selectedRef : null}
                         key={suggestion.id} 
                         className={cn(
-                          "p-3 hover:bg-gray-100 text-black cursor-pointer transition-colors text-sm h-11",
-                          { "bg-gray-100": index === selectedIndex }
+                          "p-3 hover:bg-gray-100 cursor-pointer transition-colors",
+                          textColor,
+                          sizeClasses[size],
+                          { [suggestionHighlightColor]: index === selectedIndex }
                         )}
                         onClick={() => handleSelect(suggestion.value)}
                       >
