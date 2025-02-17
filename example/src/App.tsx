@@ -25,7 +25,7 @@ const suggestions = [
   { id: 21, value: "Watermelon" },
   { id: 22, value: "Xylocarp" },
   { id: 23, value: "Yellow" },
-  { id: 24, value: "Zucchini" },  
+  { id: 24, value: "Zucchini" },
 ];
 
 function App() {
@@ -41,7 +41,13 @@ function App() {
           <span>Always Open</span>
           <SearchBar alwaysOpen />
           <span>Autocomplete Dropdown</span>
-          <SearchBar autoComplete suggestions={suggestions} />
+          <SearchBar
+            autoComplete
+            suggestions={suggestions}
+            suggestionHighlightColor="bg-teal-200"
+            onSelect={(e) => console.log(e)}
+            onChange={(e) => console.log(e)}
+          />
         </div>
       </section>
     </div>
