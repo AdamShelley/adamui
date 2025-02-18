@@ -62,7 +62,7 @@ const SearchBar = ({
   },
   clearOnSelect = false,
   closeOnSelect = false,
-  maxSuggestions = 6,
+  maxSuggestions = 4,
 }: SearchBarProps) => {
   const [isOpen, setIsOpen] = React.useState(alwaysOpen ?? false);
   const [query, setQuery] = React.useState("");
@@ -298,7 +298,16 @@ const SearchBar = ({
                   }
                   className="w-full overflow-hidden"
                 >
-                  <div className={cn("p-0 m-0", backgroundColor)}>
+                  <div
+                    className={cn("p-0 m-0", backgroundColor)}
+                    style={{
+                      maxHeight: Math.min(
+                        filteredSuggestions.length *
+                          (size === "sm" ? 36 : size === "lg" ? 52 : 44),
+                        250
+                      ),
+                    }}
+                  >
                     {filteredSuggestions.map((suggestion, index) => (
                       <div
                         ref={index === selectedIndex ? selectedRef : null}
