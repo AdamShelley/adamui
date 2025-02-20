@@ -1,0 +1,37 @@
+{
+  "name": "@adamui/search-bar",
+  "version": "1.0.0",
+  "description": "A customizable search bar component with autocomplete and animations",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "framer-motion": "^10.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.474.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "react",
+    "search",
+    "autocomplete",
+    "ui",
+    "component",
+    "tailwind"
+  ],
+  "author": "Adam Shelley",
+  "license": "MIT"
+}

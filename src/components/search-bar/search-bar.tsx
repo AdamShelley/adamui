@@ -1,7 +1,10 @@
 import React from "react";
 import { cn } from "../../lib/utils";
 import { Search } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, HTMLMotionProps } from "framer-motion";
+
+// Add type for motion div props
+type MotionDivProps = HTMLMotionProps<"div">;
 
 export interface Suggestion {
   id: string | number;
