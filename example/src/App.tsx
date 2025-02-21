@@ -1,3 +1,4 @@
+import * as React from "react";
 import SearchBar from "../../src/components/search-bar/search-bar";
 
 // Define some sample suggestions

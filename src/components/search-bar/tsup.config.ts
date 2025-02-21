@@ -7,4 +7,10 @@ export default defineConfig({
     clean: true,
     external: ["react", "react-dom", "framer-motion"],
     treeshake: true,
+    target: 'es2019',
+    sourcemap: true,
+    minify: true,
+    esbuildOptions(options) {
+        options.jsx = 'automatic'
+    }
 });

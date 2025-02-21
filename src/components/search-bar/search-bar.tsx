@@ -1,10 +1,7 @@
 import React from "react";
 import { cn } from "../../lib/utils";
 import { Search } from "lucide-react";
-import { AnimatePresence, motion, HTMLMotionProps } from "framer-motion";
-
-// Add type for motion div props
-type MotionDivProps = HTMLMotionProps<"div">;
+import { AnimatePresence, motion } from "framer-motion";
 
 export interface Suggestion {
   id: string | number;
@@ -86,7 +83,7 @@ const SearchBar = ({
 
   const handleClick = () => {
     if (alwaysOpen) return;
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev: boolean) => !prev);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,12 +121,12 @@ const SearchBar = ({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % filteredLength);
+        setSelectedIndex((prev: number) => (prev + 1) % filteredLength);
         break;
       case "ArrowUp":
         e.preventDefault();
         setSelectedIndex(
-          (prev) => (prev - 1 + filteredLength) % filteredLength
+          (prev: number) => (prev - 1 + filteredLength) % filteredLength
         );
         break;
       case "Enter":
