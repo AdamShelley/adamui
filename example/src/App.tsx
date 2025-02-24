@@ -45,7 +45,6 @@ function App() {
           <SearchBar
             autoComplete
             suggestions={suggestions}
-            suggestionHighlightColor="bg-teal-200"
             onSelect={(e) => console.log(e)}
             onChange={(e) => console.log(e)}
           />

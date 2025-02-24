@@ -189,8 +189,7 @@ const SearchBar = ({
             className={cn(
               variantClasses[variant],
               backgroundColor,
-              "transition-[border-radius] duration-300 ease-out",
-              showSuggestions ? "rounded-t-[24px]" : "rounded-[24px]",
+              "transition-[border-radius] duration-300 ease-out rounded-[24px] overflow-hidden", // Added overflow-hidden
               className
             )}
           >
@@ -299,13 +298,19 @@ const SearchBar = ({
                   className="w-full overflow-hidden"
                 >
                   <div
-                    className={cn("p-0 m-0", backgroundColor)}
+                    className={cn(
+                      "p-0 m-0",
+                      backgroundColor,
+                      "overflow-hidden" // Added overflow-hidden
+                    )}
                     style={{
                       maxHeight: Math.min(
                         filteredSuggestions.length *
                           (size === "sm" ? 36 : size === "lg" ? 52 : 44),
                         250
                       ),
+                      borderBottomLeftRadius: "24px", // Added explicit radius
+                      borderBottomRightRadius: "24px", // Added explicit radius
                     }}
                   >
                     {filteredSuggestions.map((suggestion, index) => (
@@ -313,14 +318,17 @@ const SearchBar = ({
                         ref={index === selectedIndex ? selectedRef : null}
                         key={suggestion.id}
                         className={cn(
-                          "p-3 hover:bg-gray-100 cursor-pointer transition-colors ",
+                          "p-3 cursor-pointer transition-colors group ",
                           textColor,
                           sizeClasses[size],
                           {
                             [suggestionHighlightColor]: index === selectedIndex,
+                            [`hover:${suggestionHighlightColor}`]: true,
                           }
                         )}
                         onClick={() => handleSelect(suggestion.value)}
+                        onMouseEnter={() => setSelectedIndex(index)}
+                        onMouseLeave={() => setSelectedIndex(-1)}
                       >
                         {suggestion.value}
                       </div>
