@@ -71,6 +71,14 @@ const SearchBar = ({
   const selectedRef = React.useRef<HTMLDivElement>(null);
   const uniqueId = React.useId();
   const typingTimeoutRef = React.useRef<number>();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Calculate the fixed height based on size
+  const fixedHeightMap = {
+    sm: 40, // px
+    md: 48, // px
+    lg: 56, // px
+  };
 
   React.useEffect(() => {
     if (selectedRef.current) {
@@ -80,6 +88,15 @@ const SearchBar = ({
       });
     }
   }, [selectedIndex]);
+
+  React.useEffect(() => {
+    if (isOpen && inputRef.current) {
+      // Focus the input when opened
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
 
   const handleClick = () => {
     if (alwaysOpen) return;
@@ -137,15 +154,16 @@ const SearchBar = ({
         break;
       case "Escape":
         setSelectedIndex(-1);
+        setIsOpen(false);
         break;
     }
   };
 
   // Size classes
   const sizeClasses = {
-    sm: "text-sm py-2",
-    md: "text-base py-3",
-    lg: "text-lg py-4",
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-lg",
   };
 
   // Variant classes
@@ -166,8 +184,15 @@ const SearchBar = ({
 
   const scale = isTyping ? 0.99 : isOpen ? 1.01 : 1;
 
+  // Width values for different sizes
+  const inputWidthValues = {
+    sm: 150,
+    md: 200,
+    lg: 250,
+  };
+
   return (
-    <div className="relative w-full" style={{ minHeight: sizeClasses[size] }}>
+    <div className="relative w-full">
       <div className="w-fit">
         <motion.div
           layoutId={`searchbar-${uniqueId}`}
@@ -189,15 +214,18 @@ const SearchBar = ({
             className={cn(
               variantClasses[variant],
               backgroundColor,
-              "transition-[border-radius] duration-300 ease-out rounded-[24px] overflow-hidden", // Added overflow-hidden
+              "transition-[border-radius] duration-300 ease-out rounded-[24px] overflow-hidden",
               className
             )}
           >
             <div
               className={cn(
-                "flex items-center transition-[padding] duration-300",
-                isOpen ? "pr-4" : "pr-0"
+                "flex items-center",
+                // Fixed height to prevent layout shifts
+                "h-full"
               )}
+              // Use a fixed height based on size to maintain consistency
+              style={{ height: fixedHeightMap[size] }}
             >
               <motion.div
                 animate={
@@ -216,11 +244,11 @@ const SearchBar = ({
                   },
                   rotate: { type: "spring", stiffness: 200, damping: 20 },
                 }}
-                className="flex items-center"
+                className="flex items-center h-full"
               >
                 <Search
                   className={cn(
-                    "h-5 w-5 font-bold m-3 transition-colors duration-300",
+                    "h-5 w-5 font-bold mx-3 transition-colors duration-300",
                     {
                       [iconColor || "text-gray-500"]: isOpen,
                       [iconColor || "text-teal-600"]: !isOpen,
@@ -231,16 +259,18 @@ const SearchBar = ({
                 />
               </motion.div>
 
+              {/* This is a placeholder div that maintains space when input is not shown */}
+              {!isOpen && (
+                <div style={{ width: 0, height: fixedHeightMap[size] }} />
+              )}
+
               <AnimatePresence mode="wait">
                 {isOpen && (
                   <motion.div
                     initial={!disableAnimations ? { width: 0 } : undefined}
                     animate={
                       !disableAnimations
-                        ? {
-                            width:
-                              size === "sm" ? 150 : size === "lg" ? 250 : 200,
-                          }
+                        ? { width: inputWidthValues[size] }
                         : undefined
                     }
                     exit={!disableAnimations ? { width: 0 } : undefined}
@@ -249,20 +279,27 @@ const SearchBar = ({
                       stiffness: springConfig.stiffness,
                       damping: springConfig.damping,
                     }}
-                    style={{ overflow: "hidden" }}
+                    style={{
+                      overflow: "hidden",
+                      height: fixedHeightMap[size],
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
                     <motion.div
                       initial={!disableAnimations ? { opacity: 0 } : undefined}
                       animate={!disableAnimations ? { opacity: 1 } : undefined}
                       exit={!disableAnimations ? { opacity: 0 } : undefined}
+                      className="w-full h-full flex items-center"
                     >
                       <input
+                        ref={inputRef}
                         type="text"
                         className={cn(
                           backgroundColor,
                           textColor,
                           sizeClasses[size],
-                          "outline-none focus:outline-none focus:ring-0 w-full pl-2"
+                          "outline-none focus:outline-none focus:ring-0 w-full pl-2 pr-4 h-full"
                         )}
                         value={query}
                         placeholder={placeholder}
@@ -301,7 +338,7 @@ const SearchBar = ({
                     className={cn(
                       "p-0 m-0",
                       backgroundColor,
-                      "overflow-hidden" // Added overflow-hidden
+                      "overflow-hidden"
                     )}
                     style={{
                       maxHeight: Math.min(
@@ -309,8 +346,8 @@ const SearchBar = ({
                           (size === "sm" ? 36 : size === "lg" ? 52 : 44),
                         250
                       ),
-                      borderBottomLeftRadius: "24px", // Added explicit radius
-                      borderBottomRightRadius: "24px", // Added explicit radius
+                      borderBottomLeftRadius: "24px",
+                      borderBottomRightRadius: "24px",
                     }}
                   >
                     {filteredSuggestions.map((suggestion, index) => (
