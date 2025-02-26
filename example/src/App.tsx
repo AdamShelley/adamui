@@ -44,6 +44,7 @@ function App() {
           <span>Autocomplete Dropdown</span>
           <SearchBar
             autoComplete
+            showClear={true}
             suggestions={suggestions}
             onSelect={(e) => console.log(e)}
             onChange={(e) => console.log(e)}

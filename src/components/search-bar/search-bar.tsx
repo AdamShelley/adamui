@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "../../lib/utils";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 export interface Suggestion {
@@ -17,6 +17,7 @@ export interface SearchBarProps {
   alwaysOpen?: boolean;
   autoComplete?: boolean;
   suggestions?: Suggestion[];
+  showClear?: boolean;
   onSelect?: (value: string) => void;
   onChange?: (value: string) => void;
   // Styling options
@@ -29,7 +30,7 @@ export interface SearchBarProps {
   iconColor?: string;
   suggestionHighlightColor?: string;
   // Animation options
-  disableAnimations?: boolean;
+  // disableAnimations?: boolean;
   springConfig?: {
     stiffness?: number;
     damping?: number;
@@ -45,6 +46,7 @@ const SearchBar = ({
   alwaysOpen = false,
   autoComplete = false,
   suggestions = [],
+  showClear = true,
   onSelect,
   onChange,
   variant = "default",
@@ -55,7 +57,6 @@ const SearchBar = ({
   textColor = "text-black",
   iconColor,
   suggestionHighlightColor = "bg-gray-100",
-  disableAnimations = false,
   springConfig = {
     stiffness: 700,
     damping: 50,
@@ -72,12 +73,12 @@ const SearchBar = ({
   const uniqueId = React.useId();
   const typingTimeoutRef = React.useRef<number>();
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Calculate the fixed height based on size
   const fixedHeightMap = {
-    sm: 40, // px
-    md: 48, // px
-    lg: 56, // px
+    sm: 40,
+    md: 48,
+    lg: 56,
   };
 
   React.useEffect(() => {
@@ -131,6 +132,20 @@ const SearchBar = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // if (e.key === "Enter") {
+    //   if (selectedIndex >= 0 && filteredSuggestions.length > 0) {
+    //     const value = filteredSuggestions[selectedIndex].value;
+    //     handleSelect(value);
+    //   } else if (query) {
+    //     // Trigger success animation
+    //     setShowSuccess(true);
+    //     setTimeout(() => setShowSuccess(false), 1500);
+
+    //     // onSearch?.(query);
+    //   }
+    //   return;
+    // }
+
     const filteredLength = filteredSuggestions.length;
 
     if (!filteredLength) return;
@@ -191,15 +206,19 @@ const SearchBar = ({
     lg: 250,
   };
 
+  const handleClear = () => {
+    setQuery("");
+    inputRef.current?.focus();
+    onChange?.("");
+  };
+
   return (
-    <div className="relative w-full">
+    <div className="relative" style={{ width: inputWidthValues[size] }}>
       <div className="w-fit">
         <motion.div
           layoutId={`searchbar-${uniqueId}`}
-          animate={!disableAnimations ? { scale } : {}}
-          style={{
-            transformOrigin: "left center",
-            willChange: "transform",
+          animate={{
+            scale,
           }}
           transition={{
             scale: {
@@ -207,7 +226,12 @@ const SearchBar = ({
               stiffness: springConfig.stiffness,
               damping: springConfig.damping,
             },
+
             layout: { duration: 0.2 },
+          }}
+          style={{
+            transformOrigin: "left center",
+            willChange: "transform",
           }}
         >
           <div
@@ -220,7 +244,7 @@ const SearchBar = ({
           >
             <div
               className={cn(
-                "flex items-center",
+                "flex items-center relative",
                 // Fixed height to prevent layout shifts
                 "h-full"
               )}
@@ -228,14 +252,10 @@ const SearchBar = ({
               style={{ height: fixedHeightMap[size] }}
             >
               <motion.div
-                animate={
-                  !disableAnimations
-                    ? {
-                        scale: isOpen ? 0.9 : 1,
-                        rotate: isOpen ? 360 : 0,
-                      }
-                    : {}
-                }
+                animate={{
+                  scale: isOpen ? 0.9 : 1,
+                  rotate: isOpen ? 360 : 0,
+                }}
                 transition={{
                   scale: {
                     type: "spring",
@@ -267,13 +287,9 @@ const SearchBar = ({
               <AnimatePresence mode="wait">
                 {isOpen && (
                   <motion.div
-                    initial={!disableAnimations ? { width: 0 } : undefined}
-                    animate={
-                      !disableAnimations
-                        ? { width: inputWidthValues[size] }
-                        : undefined
-                    }
-                    exit={!disableAnimations ? { width: 0 } : undefined}
+                    initial={{ width: 0 }}
+                    animate={{ width: inputWidthValues[size] }}
+                    exit={{ width: 0 }}
                     transition={{
                       type: "spring",
                       stiffness: springConfig.stiffness,
@@ -287,9 +303,9 @@ const SearchBar = ({
                     }}
                   >
                     <motion.div
-                      initial={!disableAnimations ? { opacity: 0 } : undefined}
-                      animate={!disableAnimations ? { opacity: 1 } : undefined}
-                      exit={!disableAnimations ? { opacity: 0 } : undefined}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       className="w-full h-full flex items-center"
                     >
                       <input
@@ -299,7 +315,7 @@ const SearchBar = ({
                           backgroundColor,
                           textColor,
                           sizeClasses[size],
-                          "outline-none focus:outline-none focus:ring-0 w-full pl-2 pr-4 h-full"
+                          "outline-none focus:outline-none focus:ring-0 w-full pl-2 pr-8 h-full"
                         )}
                         value={query}
                         placeholder={placeholder}
@@ -311,27 +327,42 @@ const SearchBar = ({
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              <AnimatePresence>
+                {isOpen && query && showClear && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10"
+                  >
+                    <button
+                      type="button"
+                      className={cn(
+                        "p-1 rounded-full hover:bg-gray-200  transition-colors",
+                        iconColor || "text-gray-500"
+                      )}
+                      onClick={handleClear}
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <AnimatePresence>
               {showSuggestions && (
                 <motion.div
-                  initial={
-                    !disableAnimations ? { height: 0, opacity: 0 } : undefined
-                  }
-                  animate={
-                    !disableAnimations
-                      ? {
-                          height:
-                            filteredSuggestions.length *
-                            (size === "sm" ? 36 : size === "lg" ? 52 : 44),
-                          opacity: 1,
-                        }
-                      : undefined
-                  }
-                  exit={
-                    !disableAnimations ? { height: 0, opacity: 0 } : undefined
-                  }
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{
+                    height:
+                      filteredSuggestions.length *
+                      (size === "sm" ? 36 : size === "lg" ? 52 : 44),
+                    opacity: 1,
+                  }}
+                  exit={{ height: 0, opacity: 0 }}
                   className="w-full overflow-hidden"
                 >
                   <div
