@@ -73,7 +73,7 @@ const SearchBar = ({
   const uniqueId = React.useId();
   const typingTimeoutRef = React.useRef<number>();
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
+  // const [showSuccess, setShowSuccess] = useState(false);
 
   const fixedHeightMap = {
     sm: 40,
